@@ -1,6 +1,7 @@
 import streamlit as st
 import json
 import os
+import streamlit.components.v1 as components
 
 # ---------- Workspace State ----------
 STATE_FILE = os.path.join(os.path.dirname(__file__), 'workspace', 'state.json')
@@ -38,6 +39,14 @@ with st.sidebar:
     if st.button("Save Workspace"):
         save_state(state)
         st.success("Workspace saved.")
+    st.markdown("---")
+    # Mini‑app launch section
+    st.subheader("Remote Control Mini‑App")
+    if st.button("Open Mini‑App (iframe)"):
+        # Load the local HTML file and embed it
+        with open(os.path.join(os.path.dirname(__file__), 'telegram_miniapp', 'index.html'), 'r') as f:
+            html_content = f.read()
+        components.html(html_content, height=300, scrolling=True)
 
 # Main area: display modules
 st.subheader("Workspace Modules")
