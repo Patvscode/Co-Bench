@@ -40,13 +40,26 @@ with st.sidebar:
         save_state(state)
         st.success("Workspace saved.")
     st.markdown("---")
-    # Mini‑app launch section
-    st.subheader("Remote Control Mini‑App")
-    if st.button("Open Mini‑App (iframe)"):
-        # Load the local HTML file and embed it
-        with open(os.path.join(os.path.dirname(__file__), 'telegram_miniapp', 'index.html'), 'r') as f:
-            html_content = f.read()
-        components.html(html_content, height=300, scrolling=True)
+    # Mini‑app command handling
+    if st.button("Status (from Mini‑App)"):
+        import subprocess, shlex
+        try:
+            result = subprocess.check_output(shlex.split('git -C /home/pmello/.openclaw/workspace/co_bench_repo status -s'), stderr=subprocess.STDOUT, text=True)
+        except subprocess.CalledProcessError as e:
+            result = f"Error: {e.output}"
+        st.code(result or "No changes.")
+    if st.button("Restart (from Mini‑App)"):
+        st.info("Triggering a restart of the Streamlit server (please refresh the page after a few seconds).")
+        # In a real deployment you could signal a systemd service or use a watchdog.
+    if st.button("Send Log (from Mini‑App)"):
+        log_path = '/home/pmello/.openclaw/workspace/CO_BENCH_LOG.txt'
+        try:
+            with open(log_path, 'r') as f:
+                log_content = f.read()
+            st.text_area('Log output', log_content, height=300)
+        except FileNotFoundError:
+            st.warning('Log file not found.')
+
 
 # Main area: display modules
 st.subheader("Workspace Modules")
