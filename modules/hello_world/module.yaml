@@ -1,0 +1,5 @@
+name: hello_world
+description: Simple demonstration module that prints a greeting.
+entry_point: ui.py
+ui_type: page
+dependencies: []

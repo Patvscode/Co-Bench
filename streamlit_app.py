@@ -2,6 +2,7 @@ import streamlit as st
 import json
 import os
 import streamlit.components.v1 as components
+import yaml
 
 # ---------- Workspace State ----------
 STATE_FILE = os.path.join(os.path.dirname(__file__), 'workspace', 'state.json')
@@ -20,11 +21,44 @@ def save_state(state):
     with open(STATE_FILE, 'w') as f:
         json.dump(state, f, indent=2)
 
+# ---------- Module Loader ----------
+def load_modules():
+    modules_dir = os.path.join(os.path.dirname(__file__), 'modules')
+    loaded = {}
+    if os.path.isdir(modules_dir):
+        for entry in os.scandir(modules_dir):
+            if entry.is_dir():
+                manifest_path = os.path.join(entry.path, 'module.yaml')
+                if os.path.isfile(manifest_path):
+                    try:
+                        with open(manifest_path, 'r') as f:
+                            manifest = yaml.safe_load(f)
+                        entry_point = manifest.get('entry_point')
+                        ui_type = manifest.get('ui_type', 'page')
+                        if entry_point:
+                            module_path = os.path.join(entry.path, entry_point)
+                            import importlib.util
+                            spec = importlib.util.spec_from_file_location(entry.name, module_path)
+                            mod = importlib.util.module_from_spec(spec)
+                            spec.loader.exec_module(mod)
+                            loaded[manifest.get('name', entry.name)] = {
+                                'module': mod,
+                                'ui_type': ui_type,
+                                'manifest': manifest,
+                            }
+                    except Exception as e:
+                        st.warning(f"Failed to load module {entry.name}: {e}")
+    return loaded
+
 # ---------- UI ----------
 st.set_page_config(page_title="Co‑Bench Workspace", layout="wide")
 st.title("🎈 Co‑Bench: Generative Co‑Workspace")
 
 state = load_state()
+modules = load_modules()
+selected_module = None
+if modules:
+    selected_module = st.sidebar.selectbox("Run module", list(modules.keys()))
 
 # Sidebar: Module manager
 with st.sidebar:
@@ -81,13 +115,23 @@ with st.sidebar:
 
 
 # Main area: display modules
-st.subheader("Workspace Modules")
-if not state["modules"]:
-    st.info("No modules added yet. Use the sidebar to add some.")
+if selected_module:
+    mod_info = modules[selected_module]
+    st.subheader(f"Module: {selected_module}")
+    # Assume the module provides a `render` function
+    render_func = getattr(mod_info['module'], 'render', None)
+    if callable(render_func):
+        render_func()
+    else:
+        st.warning('Module has no render() function.')
 else:
-    for mod in state["modules"]:
-        st.markdown(f"### {mod['name']}")
-        st.write("(Module UI would go here.)")
+    st.subheader("Workspace Modules")
+    if not state["modules"]:
+        st.info("No modules added yet. Use the sidebar to add some.")
+    else:
+        for mod in state["modules"]:
+            st.markdown(f"### {mod['name']}")
+            st.write("(Module UI would go here.)")
 
 # Footer note
 st.caption("State is persisted in `workspace/state.json`. Changes are saved with the 'Save Workspace' button.")

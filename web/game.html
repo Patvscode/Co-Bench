@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Clicker Game</title>
+<style>
+  body {font-family:Arial,Helvetica,sans-serif; text-align:center; margin-top:50px;}
+  #score {font-size:2em; margin:20px;}
+  #gameBtn {font-size:1.5em; padding:15px 30px;}
+</style>
+</head>
+<body>
+<h1>Simple Clicker Game</h1>
+<div id="timer">Time left: <span id="time">30</span>s</div>
+<div id="score">Score: <span id="cnt">0</span></div>
+<button id="gameBtn">Click me!</button>
+<div id="msg"></div>
+<script>
+let time = 30;
+let score = 0;
+let interval = null;
+const timeEl = document.getElementById('time');
+const cntEl = document.getElementById('cnt');
+const btn = document.getElementById('gameBtn');
+const msg = document.getElementById('msg');
+
+function startTimer(){
+  interval = setInterval(()=>{
+    time--;
+    timeEl.textContent = time;
+    if(time<=0){
+      clearInterval(interval);
+      btn.disabled = true;
+      msg.textContent = "Time's up! Your final score is " + score + ".";
+    }
+  },1000);
+}
+
+btn.addEventListener('click',()=>{
+  if(time===30){ // first click starts timer
+    startTimer();
+  }
+  score++;
+  cntEl.textContent = score;
+});
+</script>
+</body>
+</html>
