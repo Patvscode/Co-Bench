@@ -59,6 +59,25 @@ with st.sidebar:
             st.text_area('Log output', log_content, height=300)
         except FileNotFoundError:
             st.warning('Log file not found.')
+    # ---- Messaging the assistant ----
+    st.subheader("Message the Assistant")
+    user_msg = st.text_input("Your message for the assistant")
+    if st.button("Send to Assistant"):
+        # Write the user message to a file that the assistant can read
+        msg_path = os.path.join(os.path.dirname(__file__), 'workspace', 'user_message.txt')
+        with open(msg_path, 'w') as f:
+            f.write(user_msg)
+        st.success("Message sent. Awaiting reply…")
+    # Show assistant reply if available
+    reply_path = os.path.join(os.path.dirname(__file__), 'workspace', 'assistant_reply.txt')
+    if os.path.exists(reply_path):
+        with open(reply_path, 'r') as f:
+            reply = f.read()
+        st.subheader("Assistant reply")
+        st.write(reply)
+        # Optionally clear after showing
+        # os.remove(reply_path)
+
 
 
 # Main area: display modules
