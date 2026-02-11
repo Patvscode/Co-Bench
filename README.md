@@ -39,7 +39,10 @@ If you prefer a quick test without enabling Pages, you can also use the raw URLs
 - `https://raw.githubusercontent.com/<YOUR_GITHUB_USERNAME>/Co-Bench/main/web/game.html`
 - `https://raw.githubusercontent.com/<YOUR_GITHUB_USERNAME>/Co-Bench/main/web/tool.html`
 
+
 ---
+**Last automated deployment:** $(date -u +"%Y-%m-%d %H:%M UTC")
+
 
 A simple Streamlit app template for you to modify!
 
